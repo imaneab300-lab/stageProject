@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ChevronDown, ArrowRight, Star, ShieldCheck, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import ProductCard from '../components/ui/ProductCard';
@@ -14,7 +14,7 @@ const FadeIn = ({ children, delay = 0, className = '' }) => (
     initial={{ opacity: 0, y: 30 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, margin: '-60px' }}
-    transition={{ duration: 0.7, delay }}
+    transition={{ duration: 0.8, delay }}
     className={className}
   >
     {children}
@@ -22,180 +22,210 @@ const FadeIn = ({ children, delay = 0, className = '' }) => (
 );
 
 const Home = () => {
+  // Get 4 featured products from the updated dataset
+  const featuredProducts = products.filter(p => p.featured).slice(0, 4);
+
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-hidden bg-aether-800 transition-colors duration-500">
       {/* ═══════════════ HERO SECTION ═══════════════ */}
       <section className="relative min-h-screen flex items-center justify-center">
         {/* Background layers */}
-        <div className="absolute inset-0 bg-gradient-to-b from-aether-900 via-aether-800 to-aether-800" />
-        <div className="absolute inset-0 hero-lines" />
-        <div className="absolute inset-0 hero-glow" />
-
-        {/* Decorative top gradient bar */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
+        <div className="absolute inset-0 bg-aether-800 transition-colors duration-700" />
+        <div className="absolute inset-0 hero-lines opacity-20" />
+        <div className="absolute inset-0 hero-glow opacity-30" />
 
         {/* Content */}
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-16">
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white leading-tight tracking-wide"
+        <div className="relative z-10 text-center px-4 max-w-6xl mx-auto pt-20">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.2, ease: "circOut" }}
           >
-            THE ART OF{' '}
-            <span className="italic text-cyan-400">REFINED</span>{' '}
-            LIVING
-          </motion.h1>
+            <span className="text-[11px] tracking-[0.5em] uppercase text-cyan-500 font-bold mb-6 block">
+              ESTABLISHED 1924 — GENEVE — SUISSE
+            </span>
+            <h1 className="font-serif text-[22px] md:text-[28px] text-text-primary leading-[1.2] tracking-[0.05em] uppercase font-medium mb-8">
+              THE ART OF{' '}
+              <span className="italic text-cyan-500 relative inline-block">
+                REFINED
+                <svg className="absolute -bottom-2 left-0 w-full h-2 text-cyan-500/20" viewBox="0 0 100 10" preserveAspectRatio="none">
+                  <path d="M0 5 Q 25 0, 50 5 T 100 5" fill="none" stroke="currentColor" strokeWidth="2" />
+                </svg>
+              </span>{' '}
+              LIVING
+            </h1>
+          </motion.div>
 
           <motion.p
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="mt-6 md:mt-8 text-sm md:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed tracking-wide"
+            className="mt-8 text-text-secondary max-w-2xl mx-auto text-[14px] md:text-[15px] leading-[1.6] font-medium uppercase tracking-[0.2em] opacity-70"
           >
-            Curating an exclusive selection of timeless pieces for the discerning collector.
-            <br className="hidden sm:block" />
-            Experience craftsmanship that transcends eras.
+            Curating an exclusive selection of timeless pieces for the discerning collector. 
+            Experience craftsmanship that transcends generations.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
+            className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-8"
           >
-            <Button variant="primary">Explore Collection</Button>
-            <Button variant="outline">The Bespoke Journey</Button>
+            <Link to="/shop">
+              <Button variant="primary" className="px-14 py-6 text-[11px] tracking-[0.4em] uppercase font-bold shadow-2xl shadow-cyan-500/20 active:scale-95 transition-all">
+                Explore Collection
+              </Button>
+            </Link>
+            <Link to="/categories">
+              <Button variant="outline" className="px-14 py-6 text-[11px] tracking-[0.4em] uppercase font-bold border-glass-border hover:bg-text-primary hover:text-aether-900 transition-all">
+                The Archive
+              </Button>
+            </Link>
           </motion.div>
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 scroll-indicator">
-          <span className="text-[10px] tracking-[0.25em] uppercase text-slate-500">Scroll</span>
-          <ChevronDown className="w-4 h-4 text-slate-500" />
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 scroll-indicator">
+          <span className="text-[10px] tracking-[0.5em] uppercase text-text-muted font-bold opacity-60">Descend</span>
+          <div className="w-[1px] h-16 bg-gradient-to-b from-cyan-500/50 to-transparent" />
         </div>
-
-        {/* Bottom shadow ellipse */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[60px] bg-gradient-to-t from-aether-800 to-transparent rounded-[50%] blur-sm" />
       </section>
 
       {/* ═══════════════ DOMAINS SECTION ═══════════════ */}
-      <section className="py-20 md:py-28 px-4 max-w-7xl mx-auto">
-        <FadeIn className="text-center mb-14">
-          <h2 className="section-title tracking-[0.15em] uppercase">
-            Our Domains
+      <section className="py-32 px-4 max-w-7xl mx-auto">
+        <FadeIn className="text-center mb-24">
+          <span className="text-[11px] tracking-[0.4em] uppercase text-cyan-500 font-bold mb-5 block">Our Legacy</span>
+          <h2 className="text-[20px] md:text-[24px] tracking-[0.1em] uppercase font-medium text-text-primary">
+            Curated Domains
           </h2>
+          <div className="w-24 h-[1px] bg-cyan-500/20 mx-auto mt-10" />
         </FadeIn>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {domains.map((domain, i) => (
             <DomainCard key={domain.id} domain={domain} index={i} />
           ))}
         </div>
       </section>
 
-      {/* ═══════════════ PRODUCTS SECTION ═══════════════ */}
-      <section className="py-20 md:py-28 px-4 max-w-7xl mx-auto">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4">
-          <FadeIn>
-            <h2 className="section-title tracking-[0.08em] uppercase">
-              Seasonal Highlights
-            </h2>
-            <p className="mt-3 text-sm text-slate-500 max-w-md">
-              Handpicked masterpieces from our latest arrivals
-            </p>
-          </FadeIn>
-          <FadeIn delay={0.2}>
-            <Link
-              to="/vault"
-              className="text-cyan-400 text-[11px] tracking-[0.15em] uppercase font-medium hover:text-cyan-300 transition-colors flex items-center gap-1"
-            >
-              View All Products <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </FadeIn>
-        </div>
+      {/* ═══════════════ FEATURED PRODUCTS ═══════════════ */}
+      <section className="py-32 bg-aether-700 transition-colors duration-700">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-end justify-between mb-24 gap-12">
+            <FadeIn className="max-w-2xl">
+              <span className="text-[11px] tracking-[0.4em] uppercase text-cyan-500 font-bold mb-5 block">Artisanal Selection</span>
+              <h2 className="text-[20px] md:text-[24px] tracking-[0.1em] uppercase font-medium text-text-primary">
+                The Vault Highlights
+              </h2>
+              <p className="mt-6 text-text-secondary text-[14px] font-medium leading-relaxed uppercase tracking-[0.2em] opacity-70">
+                Handpicked masterpieces from our latest arrivals, representing the absolute peak of contemporary luxury and timeless design.
+              </p>
+            </FadeIn>
+            <FadeIn delay={0.2}>
+              <Link to="/shop" className="group flex items-center gap-4 text-cyan-500 text-[11px] tracking-[0.4em] uppercase font-bold hover:text-cyan-400 transition-all">
+                Full Collection <ArrowRight className="w-4 h-4 group-hover:translate-x-3 transition-transform" />
+              </Link>
+            </FadeIn>
+          </div>
 
-        {/* Product grid — horizontal scroll on mobile, grid on desktop */}
-        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-5 overflow-x-auto pb-4 md:pb-0 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
-          {products.slice(0, 4).map((product, i) => (
-            <ProductCard key={product.id} product={product} index={i} />
-          ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+            {featuredProducts.map((product, i) => (
+              <ProductCard key={product.id} product={product} index={i} />
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ═══════════════ TAILORED SECTION ═══════════════ */}
-      <section className="py-20 md:py-28 px-4 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left — Text */}
-          <FadeIn>
-            <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl text-white leading-tight tracking-wide uppercase">
-              Tailored to<br />
-              <span className="italic text-cyan-400">Perfection</span>
-            </h2>
-            <p className="mt-6 text-sm text-slate-400 leading-relaxed max-w-lg">
-              Our Bespoke service offers an unparalleled journey into personalized luxury.
-              From selecting the rarest materials to the final masterstrokes of our artisans,
-              your vision becomes reality.
-            </p>
-
-            <ul className="mt-8 space-y-4">
-              {[
-                'Private Consultation',
-                'Rare Material Sourcing',
-                'Global Concierge Delivery',
-              ].map((item) => (
-                <li key={item} className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-cyan-400 flex-shrink-0" />
-                  <span className="text-sm text-slate-300 tracking-wide uppercase">
-                    {item}
+      {/* ═══════════════ COLLECTIONS PREVIEW ═══════════════ */}
+      <section className="py-40 px-4 bg-aether-800 transition-colors duration-700">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+            <FadeIn>
+              <div className="relative aspect-square rounded-[3rem] overflow-hidden group border border-glass-border shadow-2xl">
+                <img 
+                  src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1000&h=1000&fit=crop&q=80" 
+                  alt="Limited Edition" 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2000ms] grayscale group-hover:grayscale-0"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-aether-900/80 via-transparent to-transparent" />
+                <div className="absolute bottom-12 left-12">
+                  <span className="px-5 py-2 bg-cyan-500/10 backdrop-blur-xl border border-cyan-500/20 rounded-full text-[10px] text-cyan-500 tracking-[0.4em] uppercase font-bold shadow-2xl">
+                    Limited Artifact
                   </span>
-                </li>
-              ))}
-            </ul>
+                  <h3 className="text-[20px] md:text-[24px] font-serif text-text-primary mt-6 uppercase tracking-[0.05em] font-medium leading-tight">The Celestial<br/>Chronicles</h3>
+                </div>
+              </div>
+            </FadeIn>
 
-            <div className="mt-10">
-              <Link
-                to="/vault"
-                className="text-cyan-400 text-[11px] tracking-[0.15em] uppercase font-semibold hover:text-cyan-300 transition-colors flex items-center gap-2"
-              >
-                Start Your Journey <ArrowRight className="w-4 h-4" />
+            <div className="space-y-20">
+              <FadeIn delay={0.2}>
+                <div className="flex flex-col md:flex-row gap-12 items-start group">
+                  <div className="w-24 h-24 rounded-3xl bg-cyan-500/5 flex items-center justify-center flex-shrink-0 border border-cyan-500/20 shadow-2xl transition-all group-hover:bg-cyan-500/10 group-hover:scale-110">
+                    <Star className="w-10 h-10 text-cyan-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-[18px] md:text-[20px] font-serif text-text-primary mb-4 uppercase tracking-[0.2em] font-semibold">Unrivaled Exclusivity</h3>
+                    <p className="text-text-secondary font-medium uppercase tracking-[0.15em] text-[13px] leading-relaxed opacity-60">
+                      Access pieces that are crafted in limited quantities, ensuring your selection remains a rare statement of absolute individuality.
+                    </p>
+                  </div>
+                </div>
+              </FadeIn>
+
+              <FadeIn delay={0.4}>
+                <div className="flex flex-col md:flex-row gap-12 items-start group">
+                  <div className="w-24 h-24 rounded-3xl bg-cyan-500/5 flex items-center justify-center flex-shrink-0 border border-cyan-500/20 shadow-2xl transition-all group-hover:bg-cyan-500/10 group-hover:scale-110">
+                    <ShieldCheck className="w-10 h-10 text-cyan-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-serif text-text-primary mb-5 uppercase tracking-[0.3em] font-bold">Master Craftsmanship</h3>
+                    <p className="text-text-secondary font-bold uppercase tracking-[0.2em] text-[11px] leading-relaxed opacity-70">
+                      Every piece undergoes rigorous inspection by our master artisans to ensure it meets the GLACIER standard of absolute excellence.
+                    </p>
+                  </div>
+                </div>
+              </FadeIn>
+
+              <FadeIn delay={0.6}>
+                <div className="flex flex-col md:flex-row gap-12 items-start group">
+                  <div className="w-24 h-24 rounded-3xl bg-cyan-500/5 flex items-center justify-center flex-shrink-0 border border-cyan-500/20 shadow-2xl transition-all group-hover:bg-cyan-500/10 group-hover:scale-110">
+                    <Globe className="w-10 h-10 text-cyan-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-serif text-text-primary mb-5 uppercase tracking-[0.3em] font-bold">Global Logistics</h3>
+                    <p className="text-text-secondary font-bold uppercase tracking-[0.2em] text-[11px] leading-relaxed opacity-70">
+                      White-glove delivery service to any corner of the globe, maintaining the integrity of your purchase from our vault to yours.
+                    </p>
+                  </div>
+                </div>
+              </FadeIn>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ CALL TO ACTION ═══════════════ */}
+      <section className="py-48 relative overflow-hidden">
+        <div className="absolute inset-0 bg-aether-700 transition-colors duration-700" />
+        <div className="absolute inset-0 hero-lines opacity-10" />
+        
+        <div className="relative z-10 max-w-5xl mx-auto px-4 text-center">
+          <FadeIn>
+            <h2 className="text-[24px] md:text-[32px] font-serif text-text-primary leading-[1.2] mb-12 uppercase tracking-[0.05em] font-medium">
+              Begin Your <span className="italic text-cyan-500">Luxury</span> Legacy
+            </h2>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-10">
+              <Link to="/register">
+                <Button variant="primary" className="px-16 py-6 text-[11px] tracking-[0.4em] uppercase font-bold shadow-2xl shadow-cyan-500/30 active:scale-95 transition-all">
+                  Join the Circle
+                </Button>
               </Link>
-            </div>
-          </FadeIn>
-
-          {/* Right — Images */}
-          <FadeIn delay={0.2} className="grid grid-cols-2 gap-4">
-            <div className="space-y-4">
-              <div className="rounded-2xl overflow-hidden aspect-[3/4]">
-                <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=530&fit=crop&q=80"
-                  alt="Bespoke tailoring"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                />
-              </div>
-              <div className="rounded-2xl overflow-hidden aspect-square">
-                <img
-                  src="https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=400&h=400&fit=crop&q=80"
-                  alt="Craftsmanship detail"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                />
-              </div>
-            </div>
-            <div className="pt-8 space-y-4">
-              <div className="rounded-2xl overflow-hidden aspect-square">
-                <img
-                  src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&h=400&fit=crop&q=80"
-                  alt="Material selection"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                />
-              </div>
-              <div className="rounded-2xl overflow-hidden aspect-[3/4]">
-                <img
-                  src="https://images.unsplash.com/photo-1558171813-4c088753af8f?w=400&h=530&fit=crop&q=80"
-                  alt="Luxury atelier"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                />
-              </div>
+              <Link to="/contact">
+                <Button variant="outline" className="px-16 py-6 text-[11px] tracking-[0.4em] uppercase font-bold border-glass-border hover:bg-text-primary hover:text-aether-900 transition-all">
+                  Speak with Advisors
+                </Button>
+              </Link>
             </div>
           </FadeIn>
         </div>

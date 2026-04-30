@@ -21,10 +21,61 @@ export const topCollections = [
 ];
 
 export const systemActivity = [
-  { id: 1, type: 'order', icon: '🛍', title: 'New Order #TRX-9482', body: 'From Paris, FR', time: '3 minutes ago', color: 'cyan' },
-  { id: 2, type: 'user', icon: '👤', title: 'Customer Registration', body: 'Marco V.', time: '10 minutes ago', color: 'green' },
-  { id: 3, type: 'stock', icon: '⚠', title: 'Stock Alert: Silk Scarf', body: 'Low inventory', time: '1 hour ago', color: 'amber' },
-  { id: 4, type: 'payout', icon: '💳', title: 'Payout Disbursed', body: '$42,000.00', time: '3 hours ago', color: 'blue' },
+  { 
+    id: 1, 
+    type: 'order', 
+    icon: '🛍', 
+    title: 'New Order #TRX-9482', 
+    body: 'From Paris, FR', 
+    time: '3 minutes ago', 
+    timestamp: '2024-04-30T21:45:00Z',
+    description: 'A high-value transaction was successfully processed for a customer in Paris. The payment was verified via Stripe.',
+    relatedData: { orderId: 'TRX-9482', customer: 'Marie Laurent', amount: '$48,200', items: 2 }
+  },
+  { 
+    id: 2, 
+    type: 'user', 
+    icon: '👤', 
+    title: 'Customer Registration', 
+    body: 'Marco V.', 
+    time: '10 minutes ago', 
+    timestamp: '2024-04-30T21:38:00Z',
+    description: 'New user registration completed. Email verification sent and accepted. Profile setup in progress.',
+    relatedData: { userId: 'USR-827', name: 'Marco Visconti', email: 'marco.v@luxury.it', country: 'Italy' }
+  },
+  { 
+    id: 3, 
+    type: 'stock', 
+    icon: '⚠', 
+    title: 'Stock Alert: Silk Scarf', 
+    body: 'Low inventory', 
+    time: '1 hour ago', 
+    timestamp: '2024-04-30T20:50:00Z',
+    description: 'Inventory levels for "Midnight Silk Scarf" have fallen below the critical threshold of 5 units.',
+    relatedData: { productId: 42, name: 'Midnight Silk Scarf', currentStock: 3, reorderPoint: 5 }
+  },
+  { 
+    id: 4, 
+    type: 'payout', 
+    icon: '💳', 
+    title: 'Payout Disbursed', 
+    body: '$42,000.00', 
+    time: '3 hours ago', 
+    timestamp: '2024-04-30T18:30:00Z',
+    description: 'Weekly merchant payout successfully disbursed to the primary treasury account.',
+    relatedData: { payoutId: 'PAY-112', amount: '$42,000.00', status: 'completed', bank: 'Global Trust' }
+  },
+  { 
+    id: 5, 
+    type: 'order', 
+    icon: '🛍', 
+    title: 'Order Fulfilled #TRX-9475', 
+    body: 'To London, UK', 
+    time: '5 hours ago', 
+    timestamp: '2024-04-30T16:15:00Z',
+    description: 'Order #TRX-9475 has been packed and handed over to the courier service for express delivery.',
+    relatedData: { orderId: 'TRX-9475', courier: 'DHL Express', tracking: 'JD0123456789' }
+  }
 ];
 
 export const adminOrders = [

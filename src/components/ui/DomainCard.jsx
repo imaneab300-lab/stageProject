@@ -22,10 +22,10 @@ const DomainCard = ({ domain, index = 0 }) => {
 
       {/* Content */}
       <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-6">
-        <span className="text-[9px] tracking-[0.2em] uppercase text-cyan-400 font-medium mb-1">
+        <span className="text-[10px] tracking-[0.3em] uppercase text-cyan-500 font-bold mb-1 shadow-sm">
           {domain.subtitle}
         </span>
-        <h3 className="font-serif text-xl md:text-2xl text-white font-medium tracking-wide">
+        <h3 className="font-serif text-xl md:text-2xl text-white font-bold tracking-widest uppercase">
           {domain.title}
         </h3>
       </div>

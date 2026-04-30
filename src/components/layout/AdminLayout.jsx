@@ -5,7 +5,7 @@ import AdminTopbar from './AdminTopbar';
 
 const pageTitles = {
   '/admin/dashboard': 'Overview',
-  '/admin/inventory': 'Inventory Management',
+  '/admin/products': 'Inventory Management',
   '/admin/orders': 'Orders',
   '/admin/users': 'Users',
   '/admin/settings': 'Settings',
@@ -17,7 +17,7 @@ const AdminLayout = () => {
   const title = pageTitles[location.pathname] || 'Admin';
 
   return (
-    <div className="flex h-screen bg-[#090d18] overflow-hidden">
+    <div className="flex h-screen bg-aether-800 overflow-hidden transition-colors duration-500">
       <AdminSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <AdminTopbar pageTitle={title} />

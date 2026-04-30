@@ -23,41 +23,48 @@ const Contact = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16">
+    <div className="container mx-auto px-4 py-24">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-white mb-4">Contact Us</h1>
-          <p className="text-lg text-slate-400">Have a question? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+          <span className="text-[10px] tracking-[0.4em] uppercase text-cyan-500 font-bold mb-4 block">Concierge</span>
+          <h1 className="text-4xl md:text-6xl font-serif text-text-primary mb-6 uppercase tracking-widest font-bold">Inquiries</h1>
+          <p className="text-sm md:text-lg text-text-secondary max-w-2xl mx-auto font-bold uppercase tracking-[0.2em] opacity-80 leading-relaxed">Our dedicated advisors are at your service for bespoke consultations and acquisition assistance.</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
           {/* Contact Information */}
           <div className="lg:col-span-1 space-y-8">
-            <div className="bg-dark-800 p-8 rounded-2xl border border-dark-700">
-              <h3 className="text-xl font-semibold text-white mb-6">Get In Touch</h3>
+            <div className="glass-card p-10 border-glass-border shadow-2xl">
+              <h3 className="text-xl font-serif text-text-primary mb-10 uppercase tracking-widest font-bold">Contact</h3>
               
-              <div className="space-y-6">
-                <div className="flex items-start gap-4 text-slate-300">
-                  <Mail className="w-6 h-6 text-primary shrink-0" />
+              <div className="space-y-10">
+                <div className="flex items-start gap-6">
+                  <div className="w-12 h-12 bg-cyan-500/5 border border-cyan-500/20 rounded-xl flex items-center justify-center shadow-inner">
+                    <Mail className="w-6 h-6 text-cyan-500 shrink-0" />
+                  </div>
                   <div>
-                    <p className="font-medium text-slate-200">Email</p>
-                    <a href="mailto:support@luxe.com" className="hover:text-primary transition-colors">support@luxe.com</a>
+                    <p className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] mb-1">Email</p>
+                    <a href="mailto:concierge@glacier.luxe" className="text-sm font-bold text-text-primary hover:text-cyan-500 transition-colors uppercase tracking-widest">concierge@glacier.luxe</a>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-4 text-slate-300">
-                  <Phone className="w-6 h-6 text-primary shrink-0" />
+                <div className="flex items-start gap-6">
+                  <div className="w-12 h-12 bg-cyan-500/5 border border-cyan-500/20 rounded-xl flex items-center justify-center shadow-inner">
+                    <Phone className="w-6 h-6 text-cyan-500 shrink-0" />
+                  </div>
                   <div>
-                    <p className="font-medium text-slate-200">Phone</p>
-                    <a href="tel:+1234567890" className="hover:text-primary transition-colors">+1 (234) 567-890</a>
+                    <p className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] mb-1">Phone</p>
+                    <a href="tel:+41220000000" className="text-sm font-bold text-text-primary hover:text-cyan-500 transition-colors uppercase tracking-widest">+41 22 000 00 00</a>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-4 text-slate-300">
-                  <MapPin className="w-6 h-6 text-primary shrink-0" />
+                <div className="flex items-start gap-6">
+                  <div className="w-12 h-12 bg-cyan-500/5 border border-cyan-500/20 rounded-xl flex items-center justify-center shadow-inner">
+                    <MapPin className="w-6 h-6 text-cyan-500 shrink-0" />
+                  </div>
                   <div>
-                    <p className="font-medium text-slate-200">Location</p>
-                    <p className="mt-1 leading-relaxed">123 Elegance Blvd<br />Beverly Hills, CA 90210</p>
+                    <p className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] mb-1">Global Vault</p>
+                    <p className="text-sm font-bold text-text-primary uppercase tracking-widest leading-relaxed">Rue du Rhône 1<br />1204 Genève, Suisse</p>
                   </div>
                 </div>
               </div>
@@ -66,40 +73,42 @@ const Contact = () => {
 
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit} className="bg-dark-800 p-8 rounded-2xl border border-dark-700 space-y-6 shadow-xl">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit} className="glass-card p-10 border-glass-border space-y-8 shadow-2xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <Input 
-                  label="Your Name" 
+                  label="Your Full Name" 
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
+                  placeholder="ALEXANDRE GLACIER"
                   required 
                 />
                 <Input 
-                  label="Your Email" 
+                  label="Your Email Address" 
                   type="email" 
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
+                  placeholder="ALEX@GLACIER.LUXE"
                   required 
                 />
               </div>
               
               <div className="flex flex-col">
-                <label className="mb-1 text-sm font-medium text-slate-300">Your Message</label>
+                <label className="mb-2 text-[10px] font-bold text-text-muted uppercase tracking-[0.2em]">Message or Request</label>
                 <textarea 
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
                   rows="6" 
                   required
-                  className="bg-dark-900 border border-dark-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-slate-200 transition-colors placeholder:text-slate-500 resize-none"
-                  placeholder="How can we help you?"
+                  className="bg-aether-800 border border-glass-border rounded-xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 text-text-primary transition-all placeholder:text-text-muted/40 font-bold uppercase tracking-widest text-xs resize-none shadow-inner"
+                  placeholder="HOW CAN OUR ADVISORS ASSIST YOU TODAY?"
                 ></textarea>
               </div>
               
-              <Button type="submit" variant="primary" className="w-full py-3 text-lg" disabled={loading}>
-                {loading ? 'Sending...' : 'Send Message'}
+              <Button type="submit" variant="primary" className="w-full py-5 text-[11px] font-bold uppercase tracking-[0.3em] shadow-xl shadow-cyan-500/20" disabled={loading}>
+                {loading ? 'Dispatched...' : 'Send Inquiry'}
               </Button>
             </form>
           </div>

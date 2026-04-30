@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', mockToken);
     localStorage.setItem('user', JSON.stringify(mockUser));
     setUser(mockUser);
-    return true;
+    return mockUser;
   };
 
   const register = async (name, email, password) => {
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', mockToken);
     localStorage.setItem('user', JSON.stringify(mockUser));
     setUser(mockUser);
-    return true;
+    return mockUser;
   };
 
   const logout = () => {
