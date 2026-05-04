@@ -20,7 +20,7 @@ const domains = [
     title: "High Jewelry",
     subtitle: "COLLECTION 24",
     description: "Exceptional gems & precious metals",
-    image: "https://images.unsplash.com/photo-1515562141589-67f0d569b986?w=600&h=400&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&h=400&fit=crop&q=80",
     span: "col-span-1"
   },
   {

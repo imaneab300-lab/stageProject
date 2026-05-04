@@ -2,13 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useSearch } from '../../context/SearchContext';
-import { useProtectedCartAction } from '../../hooks/useProtectedCartAction';
+import ProductCard from '../../components/ui/ProductCard';
 import allProducts from '../../data/products';
-import { ShoppingBag, ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
 
 const Collections = () => {
   const { searchQuery } = useSearch();
-  const { protectedAddToCart } = useProtectedCartAction();
 
   const [activeTab, setActiveTab] = useState('New Arrivals');
   const [sortBy, setSortBy] = useState('Featured');
@@ -181,33 +180,7 @@ const Collections = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
             {collectionProducts.map((product, i) => (
-              <motion.div key={product.id} initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-                className="group flex flex-col h-full rounded-[2.5rem] overflow-hidden border border-glass-border hover:border-cyan-500/30 transition-all shadow-2xl relative">
-                <div className="relative aspect-[4/5] bg-aether-800 overflow-hidden">
-                  <Link to={`/product/${product.id}`} className="absolute inset-0 z-10" />
-                  <img src={product.images?.[0] || product.image} alt={product.name}
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-[1500ms] opacity-90 group-hover:opacity-100"
-                    onError={e => { e.target.src = 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400&h=500&fit=crop&q=80'; }} />
-                  {product.badge && (
-                    <div className="absolute top-6 left-6 z-20">
-                      <span className="px-4 py-2 bg-white/90 backdrop-blur-xl text-black text-[9px] font-bold tracking-[0.3em] uppercase rounded-xl shadow-2xl">
-                        {product.badge}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-8 flex-1 flex flex-col bg-aether-700/50 backdrop-blur-md">
-                  <div className="flex justify-between items-start gap-4 mb-4">
-                    <h3 className="text-[13px] font-bold text-text-primary leading-tight uppercase tracking-widest group-hover:text-cyan-500 transition-colors">{product.name}</h3>
-                    <span className="text-cyan-500 text-[13px] font-bold flex-shrink-0 tracking-tighter">${product.price.toLocaleString()}</span>
-                  </div>
-                  <p className="text-[13px] text-text-muted line-clamp-2 mb-6 flex-1 leading-relaxed font-medium uppercase tracking-[0.15em] opacity-60">{product.description}</p>
-                  <button onClick={() => protectedAddToCart(product)}
-                    className="w-full py-3.5 rounded-xl bg-aether-800 border border-glass-border text-text-secondary text-[12px] font-medium tracking-[0.3em] uppercase hover:text-white hover:bg-cyan-500 hover:border-cyan-500 transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95">
-                    <ShoppingBag className="w-4 h-4" /> Acquisition
-                  </button>
-                </div>
-              </motion.div>
+              <ProductCard key={product.id} product={product} index={i} />
             ))}
           </div>
         )}

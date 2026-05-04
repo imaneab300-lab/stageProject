@@ -7,6 +7,8 @@ import ProductCard from '../components/ui/ProductCard';
 import DomainCard from '../components/ui/DomainCard';
 import products from '../data/products';
 import domains from '../data/domains';
+import FeedbackModal from '../components/feedback/FeedbackModal';
+
 
 /* ─── Fade-in wrapper ─── */
 const FadeIn = ({ children, delay = 0, className = '' }) => (
@@ -22,6 +24,7 @@ const FadeIn = ({ children, delay = 0, className = '' }) => (
 );
 
 const Home = () => {
+  const [isFeedbackOpen, setIsFeedbackOpen] = React.useState(false);
   // Get 4 featured products from the updated dataset
   const featuredProducts = products.filter(p => p.featured).slice(0, 4);
 
@@ -230,6 +233,26 @@ const Home = () => {
           </FadeIn>
         </div>
       </section>
+
+      {/* ═══════════════ FEEDBACK TRIGGER ═══════════════ */}
+      <section className="py-20 pb-32 text-center">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsFeedbackOpen(true)}
+          className="group relative inline-flex items-center gap-3 text-[11px] tracking-[0.4em] uppercase font-bold text-text-muted hover:text-cyan-500 transition-colors py-4 px-8 border border-glass-border hover:border-cyan-500/30 rounded-full"
+        >
+          <span className="relative z-10">Want to give feedback?</span>
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/5 rounded-full transition-colors" />
+        </motion.button>
+      </section>
+
+      {/* ═══════════════ FEEDBACK MODAL ═══════════════ */}
+      <FeedbackModal 
+        isOpen={isFeedbackOpen} 
+        onClose={() => setIsFeedbackOpen(false)} 
+      />
     </div>
   );
 };

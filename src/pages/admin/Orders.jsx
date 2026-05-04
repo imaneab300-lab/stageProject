@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { adminOrders } from '../../data/adminData';
-import { useTheme } from '../../context/ThemeContext';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { toast } from 'react-hot-toast';
 
 const statusConfig = {
   pending:   { label: 'Pending',   class: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' },
@@ -17,6 +19,109 @@ const Orders = () => {
 
   const updateStatus = (id, status) =>
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+
+  const handleGenerateInvoice = (order) => {
+    try {
+      const doc = new jsPDF();
+      const timestamp = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      
+      // Parse numeric amount
+      const rawAmount = parseFloat(order.amount.replace(/[^0-9.]/g, ''));
+      const subtotal = rawAmount * 0.9;
+      const tax = rawAmount * 0.08;
+      const shipping = rawAmount * 0.02;
+      const total = subtotal + tax + shipping;
+
+      // Luxury Branding Header
+      doc.setFillColor(15, 22, 42); // aether-900
+      doc.rect(0, 0, 210, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('times', 'italic');
+      doc.setFontSize(24);
+      doc.text('GLACIER', 20, 25);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(6, 182, 212); // cyan-500
+      doc.text('OFFICIAL COMMERCIAL INVOICE', 20, 32);
+
+      // Invoice Meta
+      doc.setTextColor(15, 22, 42);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('INVOICE DETAILS', 140, 55);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Reference: ${order.id}`, 140, 62);
+      doc.text(`Date: ${order.date}`, 140, 67);
+      doc.text(`Status: ${order.status.toUpperCase()}`, 140, 72);
+
+      // Customer Info
+      doc.setFont('helvetica', 'bold');
+      doc.text('BILL TO', 20, 55);
+      doc.setFont('helvetica', 'normal');
+      doc.text(order.customer, 20, 62);
+      doc.text(`${order.customer.toLowerCase().replace(' ', '.')}@luxury.com`, 20, 67);
+      doc.text('Avenue des Champs-Élysées, Paris, France', 20, 72);
+
+      // Order Table
+      autoTable(doc, {
+        startY: 85,
+        head: [['Artifact Description', 'Qty', 'Unit Price', 'Total']],
+        body: [
+          [order.product, '1', order.amount, order.amount]
+        ],
+        theme: 'striped',
+        headStyles: { fillColor: [15, 22, 42], textColor: [255, 255, 255], fontSize: 10, fontStyle: 'bold' },
+        bodyStyles: { fontSize: 9, cellPadding: 5 },
+        columnStyles: {
+          0: { cellWidth: 100 },
+          1: { halign: 'center' },
+          2: { halign: 'right' },
+          3: { halign: 'right' }
+        }
+      });
+
+      // Summary
+      const finalY = doc.lastAutoTable.finalY + 10;
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Subtotal', 140, finalY);
+      doc.text(`$${subtotal.toLocaleString()}`, 190, finalY, { align: 'right' });
+      
+      doc.text('Shipping & Handling', 140, finalY + 7);
+      doc.text(`$${shipping.toLocaleString()}`, 190, finalY + 7, { align: 'right' });
+      
+      doc.text('Vault Insurance (Tax)', 140, finalY + 14);
+      doc.text(`$${tax.toLocaleString()}`, 190, finalY + 14, { align: 'right' });
+
+      doc.setDrawColor(226, 232, 240);
+      doc.line(140, finalY + 18, 190, finalY + 18);
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(6, 182, 212);
+      doc.text('TOTAL INVESTMENT', 140, finalY + 25);
+      doc.text(`$${rawAmount.toLocaleString()}`, 190, finalY + 25, { align: 'right' });
+
+      // Footer
+      doc.setFont('times', 'italic');
+      doc.setFontSize(10);
+      doc.setTextColor(15, 22, 42);
+      doc.text('Thank you for choosing GLACIER. Your acquisition is now part of our legacy.', 105, 270, { align: 'center' });
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(148, 163, 184);
+      doc.text('CONFIDENTIAL DOCUMENT — GLACIER LUXURY GROUP — FOR AUTHORIZED PERSONNEL ONLY', 105, 285, { align: 'center' });
+
+      doc.save(`INVOICE_${order.id}.pdf`);
+      toast.success(`Invoice ${order.id} generated`);
+    } catch (error) {
+      console.error('Invoice failed:', error);
+      toast.error('Failed to generate invoice');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -70,7 +175,7 @@ const Orders = () => {
                   <td className="px-6 py-5">
                     <span className="text-[10px] text-text-muted font-bold uppercase tracking-widest opacity-60">{order.date}</span>
                   </td>
-                  <td className="px-6 py-5">
+                  <td className="px-6 py-5 flex items-center gap-4">
                     <select
                       value={order.status}
                       onChange={e => updateStatus(order.id, e.target.value)}
@@ -80,6 +185,12 @@ const Orders = () => {
                       <option value="shipped">Shipped</option>
                       <option value="delivered">Delivered</option>
                     </select>
+                    <button
+                      onClick={() => handleGenerateInvoice(order)}
+                      className="px-3 py-1.5 rounded-lg border border-cyan-500/20 bg-cyan-500/5 text-cyan-500 text-[9px] font-bold uppercase tracking-widest hover:bg-cyan-500 hover:text-white transition-all shadow-sm shadow-cyan-500/10"
+                    >
+                      Invoice
+                    </button>
                   </td>
                 </motion.tr>
               ))}

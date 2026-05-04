@@ -3,14 +3,16 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Bell, User, Menu, X, ShoppingCart, LogOut,
-  Sun, Moon, Package, Users, TrendingUp, AlertCircle, CheckCircle2,
+  Sun, Moon, Package, Users, TrendingUp, AlertCircle, CheckCircle2, Heart
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../hooks/useAuth';
+import { useWishlist } from '../../context/WishlistContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useSearch } from '../../context/SearchContext';
 import products from '../../data/products';
+import { toast } from 'react-hot-toast';
 
 const navLinks = [
   { name: 'Home', path: '/' },
@@ -37,11 +39,21 @@ const Navbar = () => {
   const navigate  = useNavigate();
   const notifRef  = useRef(null);
 
-  const { cartCount }                              = useCart();
+  const { cartCount, clearCart }                   = useCart();
   const { user, logout }                           = useAuth();
-  const { notifications, unreadCount, markAllRead } = useNotifications();
+  const { wishlist }                               = useWishlist();
+  const { notifications, unreadCount, markAllRead, clearAllNotifications } = useNotifications();
   const { theme, toggleTheme }                     = useTheme();
   const { searchQuery, setSearchQuery }            = useSearch();
+
+  const handleLogout = () => {
+    logout();
+    clearCart();
+    toast.success('You have been signed out successfully', {
+      style: { background: '#0f1629', color: '#e2e8f0', border: '1px solid rgba(6,182,212,0.3)' },
+      icon: '👋',
+    });
+  };
 
   // Close mobile menu on route change
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
@@ -192,6 +204,16 @@ const Navbar = () => {
               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
+            {/* Wishlist */}
+            <Link to="/wishlist" className="relative text-text-muted hover:text-cyan-500 transition-all p-2.5 rounded-xl hover:bg-aether-600 border border-transparent hover:border-glass-border shadow-sm">
+              <Heart className="w-4 h-4" />
+              {wishlist.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-cyan-500 text-[8px] font-bold text-white rounded-full flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                  {wishlist.length}
+                </span>
+              )}
+            </Link>
+
             {/* Cart */}
             <Link to="/cart" className="relative text-text-muted hover:text-cyan-500 transition-all p-2.5 rounded-xl hover:bg-aether-600 border border-transparent hover:border-glass-border shadow-sm">
               <ShoppingCart className="w-4 h-4" />
@@ -205,11 +227,20 @@ const Navbar = () => {
             {/* Notification Bell */}
             <div className="relative" ref={notifRef}>
               <button
-                onClick={() => { setNotifOpen(o => !o); if (!notifOpen) markAllRead(); }}
+                onClick={() => { 
+                  if (!user) {
+                    toast.error('Please login to access your notifications', {
+                      id: 'auth-notif-toast',
+                      style: { background: '#0f172a', color: '#f8fafc', border: '1px solid rgba(6,182,212,0.2)' }
+                    });
+                  }
+                  setNotifOpen(o => !o); 
+                  if (!notifOpen && user) markAllRead(); 
+                }}
                 className="relative text-text-muted hover:text-cyan-500 transition-all p-2.5 rounded-xl hover:bg-aether-600 border border-transparent hover:border-glass-border shadow-sm"
               >
                 <Bell className="w-4 h-4" />
-                {unreadCount > 0 && (
+                {user && unreadCount > 0 && (
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-aether-700 shadow-lg" />
                 )}
               </button>
@@ -225,12 +256,30 @@ const Navbar = () => {
                   >
                     <div className="flex items-center justify-between px-5 py-4 border-b border-glass-border bg-aether-800/50">
                       <h3 className="text-[11px] font-semibold tracking-[0.2em] uppercase text-text-primary">Journal</h3>
-                      <button onClick={markAllRead} className="text-[11px] text-cyan-500 hover:text-cyan-400 tracking-[0.1em] uppercase font-bold">
-                        Clear All
-                      </button>
+                      {user && (
+                        <button onClick={clearAllNotifications} className="text-[11px] text-cyan-500 hover:text-cyan-400 tracking-[0.1em] uppercase font-bold">
+                          Clear All
+                        </button>
+                      )}
                     </div>
                     <div className="max-h-80 overflow-y-auto divide-y divide-glass-border custom-scrollbar">
-                      {notifications.length === 0 ? (
+                      {!user ? (
+                        <div className="p-10 text-center flex flex-col items-center gap-4">
+                          <div className="w-12 h-12 rounded-full bg-cyan-500/5 border border-cyan-500/10 flex items-center justify-center mb-2">
+                            <Bell className="w-5 h-5 text-cyan-500/40" />
+                          </div>
+                          <p className="text-[10px] text-text-secondary uppercase tracking-[0.2em] font-bold leading-relaxed max-w-[180px] mx-auto">
+                            Your notifications will appear here after login
+                          </p>
+                          <Link 
+                            to="/login" 
+                            onClick={() => setNotifOpen(false)}
+                            className="mt-2 px-6 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-500 text-[9px] uppercase tracking-[0.3em] font-bold hover:bg-cyan-500 hover:text-white transition-all duration-300"
+                          >
+                            Authorize Access
+                          </Link>
+                        </div>
+                      ) : notifications.length === 0 ? (
                         <div className="px-5 py-10 text-center text-text-muted text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">No new alerts</div>
                       ) : (
                         notifications.map((n) => (
@@ -253,9 +302,11 @@ const Navbar = () => {
                         ))
                       )}
                     </div>
-                    <Link to="/profile" className="block py-4 text-center text-[9px] font-bold uppercase tracking-[0.3em] text-text-muted hover:text-text-primary bg-aether-800/30 border-t border-glass-border transition-all">
-                      View Account Archive
-                    </Link>
+                    {user && (
+                      <Link to="/notifications" onClick={() => setNotifOpen(false)} className="block py-4 text-center text-[9px] font-bold uppercase tracking-[0.3em] text-cyan-500 hover:text-cyan-400 bg-aether-800/30 border-t border-glass-border transition-all">
+                        See All Notifications
+                      </Link>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -272,7 +323,7 @@ const Navbar = () => {
                     {user.name.charAt(0).toUpperCase()}
                   </div>
                 </Link>
-                <button onClick={logout} className="text-text-muted hover:text-red-500 transition-all" title="Secure Exit">
+                <button onClick={handleLogout} className="text-text-muted hover:text-red-500 transition-all" title="Secure Exit">
                   <LogOut className="w-4 h-4" />
                 </button>
               </div>
@@ -336,6 +387,14 @@ const Navbar = () => {
 
               <div className="flex justify-between items-center pt-4 border-t border-glass-border mt-4">
                 <div className="flex gap-3 items-center">
+                  <Link to="/wishlist" className="relative text-text-muted hover:text-text-primary transition-colors p-2">
+                    <Heart className="w-5 h-5" />
+                    {wishlist.length > 0 && (
+                      <span className="absolute top-1 right-1 w-4 h-4 bg-cyan-500 text-[10px] font-bold text-white rounded-full flex items-center justify-center">
+                        {wishlist.length}
+                      </span>
+                    )}
+                  </Link>
                   <Link to="/cart" className="relative text-text-muted hover:text-text-primary transition-colors p-2">
                     <ShoppingCart className="w-5 h-5" />
                     {cartCount > 0 && (
@@ -352,7 +411,7 @@ const Navbar = () => {
                 {user ? (
                   <div className="flex items-center gap-3">
                     <Link to="/profile" className="text-sm font-bold text-text-secondary uppercase tracking-widest">{user.name}</Link>
-                    <button onClick={logout} className="text-text-muted hover:text-red-500">
+                    <button onClick={handleLogout} className="text-text-muted hover:text-red-500">
                       <LogOut className="w-5 h-5" />
                     </button>
                   </div>

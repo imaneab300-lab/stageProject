@@ -14,9 +14,12 @@ import Categories from './pages/shop/Categories';
 import CategoryPage from './pages/shop/CategoryPage';
 import ProductDetails from './pages/shop/ProductDetails';
 import Cart from './pages/shop/Cart';
+import Wishlist from './pages/shop/Wishlist';
 import Checkout from './pages/shop/Checkout';
 import Support from './pages/Support';
 import Contact from './pages/Contact';
+import Notifications from './pages/Notifications';
+import Legal from './pages/Legal';
 import Profile from './pages/profile/Profile';
 import OrderHistory from './pages/profile/OrderHistory';
 
@@ -44,9 +47,22 @@ function App() {
           <Route path="/categories/:slug" element={<CategoryPage />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/wishlist" element={
+            <ProtectedRoute requiredRole="user">
+              <Wishlist />
+            </ProtectedRoute>
+          } />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/support" element={<Support />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/notifications" element={
+            <ProtectedRoute message="Please login to view your notifications">
+              <Notifications />
+            </ProtectedRoute>
+          } />
+          <Route path="/privacy" element={<Legal />} />
+          <Route path="/terms" element={<Legal />} />
+          <Route path="/shipping" element={<Legal />} />
           <Route path="/profile" element={
             <ProtectedRoute requiredRole="user">
               <Profile />

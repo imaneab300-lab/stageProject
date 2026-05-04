@@ -22,23 +22,46 @@ const Footer = () => {
 
           {/* Links */}
           <div className="flex flex-wrap items-center justify-center gap-10 md:gap-16">
-            {['Privacy Policy', 'Terms of Service', 'Shipping Info', 'Contact'].map((link) => (
+            {[
+              { name: 'Privacy Policy', path: '/privacy' },
+              { name: 'Terms of Service', path: '/terms' },
+              { name: 'Shipping Info', path: '/shipping' },
+            ].map((link) => (
               <Link
-                key={link}
-                to={link === 'Contact' ? '/contact' : '#'}
+                key={link.name}
+                to={link.path}
                 className="text-[10px] tracking-[0.3em] uppercase text-text-muted hover:text-cyan-500 transition-all font-bold"
               >
-                {link}
+                {link.name}
               </Link>
             ))}
+            <a 
+              href="https://wa.me/212600000000?text=Hello,%20I%20would%20like%20more%20information"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] tracking-[0.3em] uppercase text-text-muted hover:text-cyan-500 transition-all font-bold"
+              title="Contact us on WhatsApp"
+            >
+              Contact
+            </a>
           </div>
 
           {/* Social */}
           <div className="flex items-center gap-6">
-            <a href="#" className="text-text-muted hover:text-cyan-500 transition-all p-3.5 rounded-2xl border border-glass-border hover:border-cyan-500/30 bg-aether-800 shadow-xl group">
+            <Link 
+              to="/contact"
+              className="text-text-muted hover:text-cyan-500 transition-all p-3.5 rounded-2xl border border-glass-border hover:border-cyan-500/30 bg-aether-800 shadow-xl group relative"
+              title="Send us a Message"
+            >
               <Mail className="w-4 h-4 transition-transform group-hover:scale-110" />
-            </a>
-            <a href="#" className="text-text-muted hover:text-cyan-500 transition-all p-3.5 rounded-2xl border border-glass-border hover:border-cyan-500/30 bg-aether-800 shadow-xl group">
+            </Link>
+            <a 
+              href="https://www.google.com/maps?q=33.5731,-7.5898"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-text-muted hover:text-cyan-500 transition-all p-3.5 rounded-2xl border border-glass-border hover:border-cyan-500/30 bg-aether-800 shadow-xl group relative"
+              title="Find us on Google Maps"
+            >
               <Globe className="w-4 h-4 transition-transform group-hover:scale-110" />
             </a>
           </div>

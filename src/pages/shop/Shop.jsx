@@ -4,18 +4,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Search, Heart, ShoppingBag, ChevronDown } from 'lucide-react';
 import allProducts from '../../data/products';
 import { useSearch } from '../../context/SearchContext';
-import { useProtectedCartAction } from '../../hooks/useProtectedCartAction';
+import ProductCard from '../../components/ui/ProductCard';
 
 const categories = ['All', 'jewelry', 'accessories', 'watches', 'perfume', 'beauty', 'fashion'];
 const sorts = ['Featured', 'Price: Low–High', 'Price: High–Low', 'Newest'];
-const badgeColors = { NEW: 'bg-cyan-500/90', LIMITED: 'bg-purple-500/90', EXCLUSIVE: 'bg-amber-500/90' };
 
 const Shop = () => {
   const { searchQuery, setSearchQuery } = useSearch();
-  const { protectedAddToCart } = useProtectedCartAction();
   const [cat, setCat]     = useState('All');
   const [sort, setSort]   = useState('Featured');
-  const [wishlist, setWishlist] = useState([]);
   const [localSearch, setLocalSearch] = useState('');
 
   const activeSearch = searchQuery || localSearch;
@@ -34,9 +31,6 @@ const Shop = () => {
     if (sort === 'Featured') list = list.filter(p => p.featured).concat(list.filter(p => !p.featured));
     return list;
   }, [cat, sort, activeSearch]);
-
-  const toggleWishlist = id =>
-    setWishlist(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
 
   const handleLocalSearch = (e) => {
     setLocalSearch(e.target.value);
@@ -108,52 +102,7 @@ const Shop = () => {
       {/* Artifact Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
         {filtered.map((product, i) => (
-          <motion.div key={product.id} initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="group relative">
-            <div className="relative overflow-hidden aspect-[4/5] bg-aether-700 rounded-[2.5rem] border border-glass-border shadow-2xl">
-              <Link to={`/product/${product.id}`} className="absolute inset-0 z-10" />
-              <img src={product.images?.[0] || product.image} alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-[1500ms] group-hover:scale-110 grayscale group-hover:grayscale-0 opacity-90 group-hover:opacity-100"
-                onError={e => { e.target.src = 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400&h=400&fit=crop&q=80'; }} />
-              
-              {/* Badges */}
-              {product.badge && (
-                <div className="absolute top-6 left-6 z-20">
-                  <span className={`text-[9px] tracking-[0.3em] uppercase font-bold text-white px-4 py-2 rounded-xl shadow-2xl backdrop-blur-xl border border-white/10 ${badgeColors[product.badge] || 'bg-slate-800'}`}>
-                    {product.badge}
-                  </span>
-                </div>
-              )}
-
-              {/* Wishlist Toggle */}
-              <button onClick={() => toggleWishlist(product.id)}
-                className={`absolute top-6 right-6 p-3 rounded-2xl backdrop-blur-2xl border border-white/10 transition-all z-20 shadow-2xl 
-                  ${wishlist.includes(product.id) ? 'bg-red-500 text-white border-red-500' : 'bg-black/20 text-white/80 hover:bg-black/40 hover:text-white'}`}>
-                <Heart className={`w-4 h-4 ${wishlist.includes(product.id) ? 'fill-current' : ''}`} />
-              </button>
-
-              {/* Quick Action Overlay */}
-              <div className="absolute inset-x-6 bottom-6 translate-y-20 group-hover:translate-y-0 transition-transform duration-500 z-20">
-                <button onClick={() => protectedAddToCart(product)} className="w-full py-4 rounded-2xl bg-white text-black text-[10px] font-bold tracking-[0.4em] uppercase flex items-center justify-center gap-3 hover:bg-cyan-500 hover:text-white transition-all shadow-2xl shadow-black/50">
-                  <ShoppingBag className="w-4 h-4" /> Acquisition
-                </button>
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            </div>
-
-            {/* Metadata */}
-            <div className="mt-8 px-2">
-              <div className="flex justify-between items-start gap-4">
-                <Link to={`/product/${product.id}`} className="flex-1">
-                  <h3 className="text-[12px] md:text-[13px] font-bold text-text-primary tracking-[0.15em] uppercase leading-tight group-hover:text-cyan-500 transition-colors">{product.name}</h3>
-                </Link>
-                <div className="flex flex-col items-end">
-                  <span className="text-cyan-500 font-bold text-sm tracking-tighter">${product.price.toLocaleString()}</span>
-                  {product.originalPrice && <span className="text-text-muted text-[10px] line-through opacity-40 font-bold tracking-tighter mt-1">${product.originalPrice.toLocaleString()}</span>}
-                </div>
-              </div>
-              <p className="text-[10px] text-text-muted mt-3 uppercase tracking-[0.3em] font-bold opacity-60">{product.category}</p>
-            </div>
-          </motion.div>
+          <ProductCard key={product.id} product={product} index={i} />
         ))}
       </div>
 

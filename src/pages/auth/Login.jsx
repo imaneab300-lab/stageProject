@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -8,17 +8,20 @@ import toast from 'react-hot-toast';
 const Login = () => {
   const { user, login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const from = location.state?.from?.pathname || '/shop';
+
   // If user is already logged in, redirect them away
   React.useEffect(() => {
     if (user) {
-      navigate(user.role === 'admin' ? '/admin/dashboard' : '/shop', { replace: true });
+      navigate(user.role === 'admin' ? '/admin/dashboard' : from, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, from]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,7 +35,7 @@ const Login = () => {
       if (loggedInUser.role === 'admin') {
         navigate('/admin/dashboard', { replace: true });
       } else {
-        navigate('/shop', { replace: true });
+        navigate(from, { replace: true });
       }
     } catch (error) {
       toast.error('Invalid credentials. Please try again.');

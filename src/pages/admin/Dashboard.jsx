@@ -154,9 +154,6 @@ const Dashboard = () => {
           >
             Export Report
           </button>
-          <button className="px-6 py-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-[11px] text-cyan-500 font-bold uppercase tracking-[0.2em] hover:bg-cyan-500/20 transition-all">
-            Generate Invoice
-          </button>
         </div>
       </div>
 

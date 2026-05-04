@@ -14,18 +14,22 @@ const DomainCard = ({ domain, index = 0 }) => {
       <img
         src={domain.image}
         alt={domain.title}
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+        className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1500ms] group-hover:scale-110 group-hover:brightness-110"
       />
 
-      {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-aether-900/90 via-aether-900/40 to-aether-900/20 group-hover:from-aether-900/80 transition-all duration-500" />
+      {/* Dark Overlay - Dynamic Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-t from-aether-900/90 via-aether-900/30 to-transparent group-hover:from-aether-900/70 transition-all duration-700" />
 
       {/* Content */}
-      <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-6">
-        <span className="text-[10px] tracking-[0.3em] uppercase text-cyan-500 font-bold mb-1 shadow-sm">
+      <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
+        <motion.span 
+          initial={{ opacity: 0, x: -10 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          className="text-[10px] tracking-[0.4em] uppercase text-cyan-500 font-bold mb-2"
+        >
           {domain.subtitle}
-        </span>
-        <h3 className="font-serif text-xl md:text-2xl text-white font-bold tracking-widest uppercase">
+        </motion.span>
+        <h3 className="font-serif text-2xl md:text-3xl text-white font-medium tracking-tight uppercase leading-tight group-hover:text-cyan-500 transition-colors duration-500">
           {domain.title}
         </h3>
       </div>

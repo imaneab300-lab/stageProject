@@ -1,18 +1,40 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShoppingBag, Calendar, Shield, Globe, ChevronLeft, Gem, Watch, Wrench, Award } from 'lucide-react';
+import { ShoppingBag, Calendar, Shield, Globe, Gem, Watch, Wrench, Award, Star } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../hooks/useAuth';
+import { useNotifications } from '../../context/NotificationContext';
 import allProducts from '../../data/products';
 import { toast } from 'react-hot-toast';
+import { useWishlist } from '../../context/WishlistContext';
+import AuthPromptModal from '../../components/auth/AuthPromptModal';
+import { Heart } from 'lucide-react';
 
-const specIcons = { gems: Gem, metal: Award, craft: Wrench, certification: Shield, material: Gem, hardware: Award, movement: Watch, case: Shield, waterResistance: Globe };
+const specIcons = { 
+  gems: Gem, 
+  metal: Award, 
+  craft: Wrench, 
+  certification: Shield, 
+  material: Gem, 
+  hardware: Award, 
+  movement: Watch, 
+  case: Shield, 
+  waterResistance: Globe 
+};
 
 const ProductDetails = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
+  const { user } = useAuth();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { addNotification } = useNotifications();
   const product = allProducts.find(p => p.id === Number(id));
+  
   const [selectedImg, setSelectedImg] = useState(0);
+  const [userRating, setUserRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
 
   if (!product) return (
     <div className="min-h-screen flex items-center justify-center pt-32 transition-colors duration-500">
@@ -30,6 +52,32 @@ const ProductDetails = () => {
   const handleAddToCart = () => {
     addToCart(product, 1);
     toast.success(`${product.name} SECURED`, {
+      style: { 
+        background: 'rgba(15, 23, 42, 0.9)', 
+        backdropFilter: 'blur(10px)',
+        color: '#f8fafc', 
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: '16px',
+        fontSize: '10px',
+        fontWeight: 'bold',
+        letterSpacing: '0.2em',
+        textTransform: 'uppercase',
+        padding: '16px 24px'
+      },
+    });
+  };
+
+  const handleRating = (rating) => {
+    if (!user) {
+      addNotification({ 
+        title: 'Member Exclusive', 
+        body: 'Login to rate this artisanal artifact and share your perspective', 
+        type: 'user' 
+      });
+      return;
+    }
+    setUserRating(rating);
+    toast.success('EVALUATION RECORDED', {
       style: { 
         background: 'rgba(15, 23, 42, 0.9)', 
         backdropFilter: 'blur(10px)',
@@ -64,6 +112,17 @@ const ProductDetails = () => {
               transition={{ duration: 0.8 }} src={product.images[selectedImg]} alt={product.name}
               className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-[2000ms] opacity-90 group-hover:opacity-100" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+            
+            {/* Wishlist Toggle Overlay */}
+            <button 
+              onClick={() => {
+                if (!user) setIsAuthModalOpen(true);
+                else toggleWishlist(product);
+              }}
+              className="absolute top-8 right-8 z-20 p-4 rounded-3xl bg-aether-900/60 backdrop-blur-2xl border border-white/10 hover:scale-110 transition-all shadow-2xl group/heart"
+            >
+              <Heart className={`w-6 h-6 transition-colors ${isInWishlist(product.id) ? 'fill-cyan-500 text-cyan-500' : 'text-white group-hover/heart:text-cyan-400'}`} />
+            </button>
           </div>
           
           {/* Dimensional Thumbnails */}
@@ -97,6 +156,42 @@ const ProductDetails = () => {
             {product.originalPrice && (
               <span className="text-[18px] text-text-muted line-through opacity-30 font-medium tracking-tight">${product.originalPrice.toLocaleString()}</span>
             )}
+          </div>
+
+          {/* Artifact Evaluation */}
+          <div className="flex flex-col gap-6 py-10 border-y border-glass-border">
+            <span className="text-[10px] tracking-[0.5em] uppercase text-text-muted font-black opacity-60">Expert Evaluation</span>
+            <div className="flex items-center gap-8">
+              <div className="flex gap-3">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <motion.button
+                    key={star}
+                    whileHover={{ scale: 1.3, rotate: 15 }}
+                    whileTap={{ scale: 0.9 }}
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    onClick={() => handleRating(star)}
+                    className="transition-all duration-300"
+                  >
+                    <Star 
+                      className={`w-7 h-7 transition-all duration-300 ${
+                        (hoverRating || userRating) >= star 
+                          ? 'fill-cyan-500 text-cyan-500 filter drop-shadow-[0_0_12px_rgba(6,182,212,0.6)]' 
+                          : 'text-text-muted/20'
+                      }`} 
+                    />
+                  </motion.button>
+                ))}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[12px] font-black text-text-primary uppercase tracking-[0.2em]">
+                  {userRating > 0 ? `AUTHENTICATED: ${userRating}.0` : 'Awaiting Verdict'}
+                </span>
+                <span className="text-[9px] text-text-muted uppercase tracking-[0.1em] font-bold opacity-40 mt-1">
+                  Verified Collector Feedback
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Blueprint Grid */}
@@ -169,6 +264,11 @@ const ProductDetails = () => {
           </div>
         </div>
       </div>
+
+      <AuthPromptModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
     </div>
   );
 };

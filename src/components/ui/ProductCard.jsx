@@ -1,8 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Heart, Star } from 'lucide-react';
 import { useProtectedCartAction } from '../../hooks/useProtectedCartAction';
+import { useWishlist } from '../../context/WishlistContext';
+import { useAuth } from '../../hooks/useAuth';
+import { useNotifications } from '../../context/NotificationContext';
+
+import AuthPromptModal from '../auth/AuthPromptModal';
 
 const badgeColors = {
   NEW:       'bg-cyan-500/90',
@@ -12,8 +17,22 @@ const badgeColors = {
 
 const ProductCard = ({ product, index = 0 }) => {
   const { protectedAddToCart } = useProtectedCartAction();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const { user } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false);
+
   // Support both shapes: product.images[] and product.image
   const imgSrc = product.images?.[0] || product.image;
+
+  const handleWishlist = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    toggleWishlist(product);
+  };
 
   return (
     <motion.div
@@ -35,6 +54,14 @@ const ProductCard = ({ product, index = 0 }) => {
             }}
           />
         </Link>
+
+        {/* Wishlist Button */}
+        <button 
+          onClick={handleWishlist}
+          className="absolute top-4 right-4 z-30 p-2.5 rounded-full bg-aether-900/40 backdrop-blur-md border border-glass-border hover:scale-110 transition-all group/heart shadow-xl"
+        >
+          <Heart className={`w-4 h-4 transition-colors ${isInWishlist(product.id) ? 'fill-cyan-500 text-cyan-500' : 'text-white group-hover/heart:text-cyan-400'}`} />
+        </button>
 
         {/* Badge */}
         {product.badge && (
@@ -68,9 +95,21 @@ const ProductCard = ({ product, index = 0 }) => {
             ${product.price.toLocaleString()}
           </span>
         </div>
+
+        {/* Rating Display */}
+        <div className="flex items-center gap-1">
+          {[...Array(5)].map((_, i) => (
+            <Star key={i} className={`w-3 h-3 ${i < Math.floor(product.rating || 4.5) ? 'fill-cyan-500 text-cyan-500' : 'text-text-muted/30'}`} />
+          ))}
+          <span className="text-[9px] text-text-muted font-bold ml-1 tracking-tighter uppercase opacity-60">
+            ({product.reviewsCount || 12} Artifacts)
+          </span>
+        </div>
+
         <p className="text-[10px] text-text-muted leading-relaxed line-clamp-2 uppercase tracking-widest font-bold opacity-80">
           {product.description}
         </p>
+
         <div className="flex items-center justify-between pt-2 border-t border-glass-border">
           <span className="text-[9px] font-bold text-text-muted uppercase tracking-[0.2em]">
             {product.category}
@@ -82,6 +121,11 @@ const ProductCard = ({ product, index = 0 }) => {
           )}
         </div>
       </div>
+      {/* Auth Prompt Modal */}
+      <AuthPromptModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
     </motion.div>
   );
 };
