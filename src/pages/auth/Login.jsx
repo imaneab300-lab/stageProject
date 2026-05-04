@@ -19,7 +19,7 @@ const Login = () => {
   // If user is already logged in, redirect them away
   React.useEffect(() => {
     if (user) {
-      navigate(user.role === 'admin' ? '/admin/dashboard' : from, { replace: true });
+      navigate(user.role === 'ADMIN' ? '/admin/dashboard' : from, { replace: true });
     }
   }, [user, navigate, from]);
 
@@ -32,7 +32,7 @@ const Login = () => {
         style: { background: '#0f1629', color: '#e2e8f0', border: '1px solid rgba(6,182,212,0.3)' },
         icon: '✦',
       });
-      if (loggedInUser.role === 'admin') {
+      if (loggedInUser.role === 'ADMIN') {
         navigate('/admin/dashboard', { replace: true });
       } else {
         navigate(from, { replace: true });

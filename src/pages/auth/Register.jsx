@@ -11,28 +11,40 @@ const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // If already logged in, redirect away immediately
   React.useEffect(() => {
     if (user) {
-      navigate(user.role === 'admin' ? '/admin/dashboard' : '/shop', { replace: true });
+      navigate(user.role === 'ADMIN' ? '/admin/dashboard' : '/shop', { replace: true });
     }
   }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast.error('Security tokens do not match.');
+      return;
+    }
+
+    if (password.length < 8) {
+      toast.error('Security token must be at least 8 characters.');
+      return;
+    }
+
     setLoading(true);
     try {
-      await register(name, email, password);
+      await register(name, email, password, confirmPassword);
       toast.success('Account created! Welcome to GLACIER.', {
         style: { background: '#0f1629', color: '#e2e8f0', border: '1px solid rgba(6,182,212,0.3)' },
         icon: '✦',
       });
       navigate('/shop', { replace: true });
     } catch (error) {
-      toast.error('Registration failed. Please try again.');
+      toast.error(error.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -99,26 +111,44 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Password */}
-            <div>
-              <label className="block text-[10px] tracking-[0.2em] uppercase text-text-muted mb-2 font-bold">Security Token</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                  className="glass-input pl-11 pr-11 w-full"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Password */}
+              <div>
+                <label className="block text-[10px] tracking-[0.2em] uppercase text-text-muted mb-2 font-bold">Security Token</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    className="glass-input pl-11 pr-11 w-full text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label className="block text-[10px] tracking-[0.2em] uppercase text-text-muted mb-2 font-bold">Confirm Token</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    className="glass-input pl-11 w-full text-xs"
+                  />
+                </div>
               </div>
             </div>
 

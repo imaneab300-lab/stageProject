@@ -316,11 +316,11 @@ const Navbar = () => {
             {user ? (
               <div className="flex items-center gap-4 ml-2 border-l border-glass-border pl-6">
                 <Link
-                  to={user.role === 'admin' ? '/admin/dashboard' : '/profile'}
+                  to={user?.role === 'ADMIN' ? '/admin/dashboard' : '/profile'}
                   className="flex items-center gap-3 group"
                 >
                   <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-cyan-500/5 text-cyan-500 flex items-center justify-center border border-cyan-500/30 text-sm font-bold shadow-xl transition-all group-hover:border-cyan-500 group-hover:shadow-cyan-500/20">
-                    {user.name.charAt(0).toUpperCase()}
+                    {user?.name?.charAt(0).toUpperCase() || 'U'}
                   </div>
                 </Link>
                 <button onClick={handleLogout} className="text-text-muted hover:text-red-500 transition-all" title="Secure Exit">

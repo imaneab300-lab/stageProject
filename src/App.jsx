@@ -48,7 +48,7 @@ function App() {
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/wishlist" element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="USER">
               <Wishlist />
             </ProtectedRoute>
           } />
@@ -64,12 +64,12 @@ function App() {
           <Route path="/terms" element={<Legal />} />
           <Route path="/shipping" element={<Legal />} />
           <Route path="/profile" element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="USER">
               <Profile />
             </ProtectedRoute>
           } />
           <Route path="/profile/orders" element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="USER">
               <OrderHistory />
             </ProtectedRoute>
           } />
@@ -77,7 +77,7 @@ function App() {
 
         {/* Admin Routes */}
         <Route path="/admin" element={
-          <ProtectedRoute requiredRole="admin">
+          <ProtectedRoute requiredRole="ADMIN">
             <AdminLayout />
           </ProtectedRoute>
         }>

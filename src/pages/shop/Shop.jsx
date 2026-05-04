@@ -1,36 +1,52 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Heart, ShoppingBag, ChevronDown } from 'lucide-react';
-import allProducts from '../../data/products';
 import { useSearch } from '../../context/SearchContext';
 import ProductCard from '../../components/ui/ProductCard';
 
-const categories = ['All', 'jewelry', 'accessories', 'watches', 'perfume', 'beauty', 'fashion'];
+const categories = ['All', 'Timepieces', 'Leather Goods', 'Fine Jewelry', 'Fragrances'];
 const sorts = ['Featured', 'Price: Low–High', 'Price: High–Low', 'Newest'];
 
 const Shop = () => {
   const { searchQuery, setSearchQuery } = useSearch();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [cat, setCat]     = useState('All');
   const [sort, setSort]   = useState('Featured');
   const [localSearch, setLocalSearch] = useState('');
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/products`);
+        if (!response.ok) throw new Error('Failed to fetch products');
+        const data = await response.json();
+        setProducts(data.data || []); 
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   const activeSearch = searchQuery || localSearch;
 
   const filtered = useMemo(() => {
-    let list = [...allProducts];
-    if (cat !== 'All') list = list.filter(p => p.category === cat);
+    if (!Array.isArray(products)) return [];
+    let list = [...products];
+    if (cat !== 'All') list = list.filter(p => p.category?.name === cat || p.category === cat);
     if (activeSearch) list = list.filter(p =>
       p.name.toLowerCase().includes(activeSearch.toLowerCase()) ||
-      p.description?.toLowerCase().includes(activeSearch.toLowerCase()) ||
-      p.category?.toLowerCase().includes(activeSearch.toLowerCase())
+      p.description?.toLowerCase().includes(activeSearch.toLowerCase())
     );
     if (sort === 'Price: Low–High') list.sort((a, b) => a.price - b.price);
     if (sort === 'Price: High–Low') list.sort((a, b) => b.price - a.price);
-    if (sort === 'Newest') list = list.filter(p => p.badge === 'NEW').concat(list.filter(p => p.badge !== 'NEW'));
-    if (sort === 'Featured') list = list.filter(p => p.featured).concat(list.filter(p => !p.featured));
     return list;
-  }, [cat, sort, activeSearch]);
+  }, [cat, sort, activeSearch, products]);
 
   const handleLocalSearch = (e) => {
     setLocalSearch(e.target.value);
@@ -99,18 +115,27 @@ const Shop = () => {
         ))}
       </div>
 
-      {/* Artifact Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
-        {filtered.map((product, i) => (
-          <ProductCard key={product.id} product={product} index={i} />
-        ))}
-      </div>
-
-      {filtered.length === 0 && (
-        <div className="text-center py-40 bg-aether-700/30 rounded-[3rem] border border-glass-border mt-16">
-          <p className="text-text-muted text-[11px] font-bold uppercase tracking-[0.5em] mb-8 opacity-60">The vault is currently empty for this selection.</p>
-          <button onClick={clearAll} className="px-10 py-4 bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 rounded-2xl text-[10px] font-black uppercase tracking-[0.4em] hover:bg-cyan-500 hover:text-white transition-all">Expand Search</button>
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-40">
+          <div className="w-12 h-12 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin mb-6"></div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-text-muted animate-pulse">Consulting the Archives...</p>
         </div>
+      ) : (
+        <>
+          {/* Artifact Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+            {filtered.map((product, i) => (
+              <ProductCard key={product.id} product={product} index={i} />
+            ))}
+          </div>
+
+          {filtered.length === 0 && (
+            <div className="text-center py-40 bg-aether-700/30 rounded-[3rem] border border-glass-border mt-16">
+              <p className="text-text-muted text-[11px] font-bold uppercase tracking-[0.5em] mb-8 opacity-60">The vault is currently empty for this selection.</p>
+              <button onClick={clearAll} className="px-10 py-4 bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 rounded-2xl text-[10px] font-black uppercase tracking-[0.4em] hover:bg-cyan-500 hover:text-white transition-all">Expand Search</button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

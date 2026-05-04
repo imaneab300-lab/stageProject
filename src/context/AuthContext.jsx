@@ -7,45 +7,93 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check locally stored token (Mock logic)
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/user`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/json'
+            }
+          });
+          if (response.ok) {
+            const result = await response.json();
+            setUser(result.data || result);
+          } else {
+            logout();
+          }
+        } catch (error) {
+          console.error('Auth check failed:', error);
+          logout();
+        }
+      }
+      setLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (email, password) => {
-    // Mock login logic
-    const mockToken = 'mock_jwt_token_12345';
-    const mockUser = {
-      id: 1, 
-      name: email.split('@')[0], 
-      email: email, 
-      role: email.includes('admin') ? 'admin' : 'user'
-    };
-    
-    localStorage.setItem('token', mockToken);
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    setUser(mockUser);
-    return mockUser;
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      let errorMessage = errorData.message || 'Login failed';
+      if (errorData.errors) {
+        const firstError = Object.values(errorData.errors)[0];
+        errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    localStorage.setItem('token', data.access_token);
+    const userData = data.user.data || data.user;
+    setUser(userData);
+    return userData;
   };
 
-  const register = async (name, email, password) => {
-    // Mock register logic
-    const mockToken = 'mock_jwt_token_12345';
-    const mockUser = { id: 2, name, email, role: 'user' };
-    
-    localStorage.setItem('token', mockToken);
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    setUser(mockUser);
-    return mockUser;
+  const register = async (name, email, password, password_confirmation) => {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ name, email, password, password_confirmation })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      let errorMessage = errorData.message || 'Registration failed';
+      if (errorData.errors) {
+        const firstError = Object.values(errorData.errors)[0];
+        errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    localStorage.setItem('token', data.access_token);
+    const userData = data.user.data || data.user;
+    setUser(userData);
+    return userData;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json' 
+        }
+      });
+    }
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
     setUser(null);
   };
 

@@ -92,7 +92,7 @@ const ProductCard = ({ product, index = 0 }) => {
             </h3>
           </Link>
           <span className="text-cyan-500 font-bold text-sm tracking-tight flex-shrink-0">
-            ${product.price.toLocaleString()}
+            ${product.price ? Number(product.price).toLocaleString() : '0'}
           </span>
         </div>
 
@@ -112,7 +112,7 @@ const ProductCard = ({ product, index = 0 }) => {
 
         <div className="flex items-center justify-between pt-2 border-t border-glass-border">
           <span className="text-[9px] font-bold text-text-muted uppercase tracking-[0.2em]">
-            {product.category}
+            {typeof product.category === 'object' ? product.category?.name : product.category}
           </span>
           {product.originalPrice && (
             <span className="text-text-muted text-[10px] line-through opacity-40">

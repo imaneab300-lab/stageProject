@@ -115,12 +115,16 @@ const Cart = () => {
                 <div className="flex-1 flex flex-col w-full">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <span className="text-[9px] tracking-[0.2em] uppercase text-cyan-500 font-bold mb-1 block">{item.category}</span>
+                      <span className="text-[9px] tracking-[0.2em] uppercase text-cyan-500 font-bold mb-1 block">
+                        {typeof item.category === 'object' ? item.category?.name : item.category}
+                      </span>
                       <Link to={`/product/${item.id}`} className="hover:text-cyan-500 transition-colors">
                         <h3 className="text-xl font-serif text-text-primary leading-tight uppercase tracking-wide">{item.name}</h3>
                       </Link>
                     </div>
-                    <span className="text-xl font-serif text-cyan-500 font-bold">${(item.price * item.qty).toLocaleString()}</span>
+                    <span className="text-xl font-serif text-cyan-500 font-bold">
+                      ${(Number(item.price) * item.qty).toLocaleString()}
+                    </span>
                   </div>
                   
                   <div className="flex items-center justify-between mt-6">

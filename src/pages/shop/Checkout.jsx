@@ -146,7 +146,7 @@ const Checkout = () => {
     return hasAllFields && hasNoErrors;
   }, [formData, errors]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isFormValid) {
       toast.error('Please verify your acquisition details.');
@@ -154,19 +154,55 @@ const Checkout = () => {
     }
 
     setIsSubmitting(true);
-    // Luxury simulation
-    setTimeout(() => {
-      const id = 'GLC-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-      setOrderId(id);
-      clearCart();
-      setSuccess(true);
-      setIsSubmitting(false);
-      window.scrollTo(0, 0);
-      toast.success('Acquisition Finalized Successfully', {
-        icon: '✦',
-        style: { background: '#0B0F1A', color: '#fff', border: '1px solid #22d3ee' }
+    const token = localStorage.getItem('token');
+
+    try {
+      // 1. Create Order
+      const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          shipping_address: `${formData.address}, ${formData.city}, ${formData.postalCode}, ${formData.country}`
+        })
       });
-    }, 3000);
+
+      if (!orderResponse.ok) throw new Error('Failed to create order');
+      const orderData = await orderResponse.json();
+      const realOrderId = orderData.id || orderData.data?.id;
+
+      // 2. Create Payment Session
+      const paymentResponse = await fetch(`${import.meta.env.VITE_API_URL}/payments/checkout`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ order_id: realOrderId })
+      });
+
+      if (!paymentResponse.ok) throw new Error('Failed to initiate payment');
+      const paymentData = await paymentResponse.json();
+
+      // 3. Redirect to Stripe
+      if (paymentData.url) {
+        toast.success('Redirecting to Secure Payment Vault...', { icon: '✦' });
+        window.location.href = paymentData.url;
+      } else {
+        throw new Error('Payment URL not received');
+      }
+
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error(error.message || 'Acquisition process interrupted.', {
+        style: { background: '#0B0F1A', color: '#fff', border: '1px solid #f43f5e' }
+      });
+      setIsSubmitting(false);
+    }
   };
 
   const tax = cartTotal * 0.12;
