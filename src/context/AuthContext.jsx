@@ -20,12 +20,16 @@ export const AuthProvider = ({ children }) => {
           if (response.ok) {
             const result = await response.json();
             setUser(result.data || result);
-          } else {
-            logout();
+          } else if (response.status === 401) {
+            // Token is invalid or expired — clear it
+            localStorage.removeItem('token');
+            setUser(null);
           }
+          // For other errors (500, network, etc.), keep the token and stay logged out temporarily
         } catch (error) {
-          console.error('Auth check failed:', error);
-          logout();
+          // Network error (backend down, XAMPP not started) — DO NOT clear the token
+          // The user will remain "unauthenticated" for this session but token stays safe
+          console.warn('Auth check failed (network issue). Token preserved for next session.');
         }
       }
       setLoading(false);

@@ -21,8 +21,8 @@ const ProductCard = ({ product, index = 0 }) => {
   const { user } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false);
 
-  // Support both shapes: product.images[] and product.image
-  const imgSrc = product.images?.[0] || product.image;
+  // Support both shapes: product.image_url (API), product.images[] (Mock) and product.image
+  const imgSrc = product.image_url || product.images?.[0] || product.image;
 
   const handleWishlist = (e) => {
     e.preventDefault();

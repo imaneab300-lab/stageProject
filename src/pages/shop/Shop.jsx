@@ -5,33 +5,43 @@ import { Search, Heart, ShoppingBag, ChevronDown } from 'lucide-react';
 import { useSearch } from '../../context/SearchContext';
 import ProductCard from '../../components/ui/ProductCard';
 
-const categories = ['All', 'Timepieces', 'Leather Goods', 'Fine Jewelry', 'Fragrances'];
 const sorts = ['Featured', 'Price: Low–High', 'Price: High–Low', 'Newest'];
 
 const Shop = () => {
   const { searchQuery, setSearchQuery } = useSearch();
   const [products, setProducts] = useState([]);
+  const [dbCategories, setDbCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cat, setCat]     = useState('All');
   const [sort, setSort]   = useState('Featured');
   const [localSearch, setLocalSearch] = useState('');
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/products`);
-        if (!response.ok) throw new Error('Failed to fetch products');
-        const data = await response.json();
-        setProducts(data.data || []); 
+        const [prodRes, catRes] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/products`),
+          fetch(`${import.meta.env.VITE_API_URL}/categories`)
+        ]);
+
+        if (prodRes.ok) {
+          const data = await prodRes.json();
+          setProducts(data.data || []);
+        }
+        if (catRes.ok) {
+          const data = await catRes.json();
+          setDbCategories(data.data || data);
+        }
       } catch (error) {
-        console.error('Failed to fetch products:', error);
-        setProducts([]);
+        console.error('Failed to fetch shop data:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProducts();
+    fetchData();
   }, []);
+
+  const categories = ['All', ...dbCategories.map(c => c.name)];
 
   const activeSearch = searchQuery || localSearch;
 

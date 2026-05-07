@@ -33,7 +33,7 @@ class ProductController extends Controller
             $query->where('price', '<=', $request->max_price);
         }
 
-        $products = $query->paginate(12);
+        $products = $query->latest()->get();
 
         return ProductResource::collection($products);
     }
@@ -62,6 +62,7 @@ class ProductController extends Controller
         }
 
         $product = Product::create($data);
+        $product->load('category');
 
         ActivityLog::create([
             'user_id' => $request->user()->id,
@@ -95,6 +96,7 @@ class ProductController extends Controller
         }
 
         $product->update($data);
+        $product->load('category');
 
         ActivityLog::create([
             'user_id' => $request->user()->id,

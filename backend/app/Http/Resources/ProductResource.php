@@ -20,7 +20,9 @@ class ProductResource extends JsonResource
             'description' => $this->description,
             'price' => $this->price,
             'stock' => $this->stock,
-            'image_url' => $this->image ? asset('storage/' . $this->image) : null,
+            'image_url' => $this->image ? (filter_var($this->image, FILTER_VALIDATE_URL) ? $this->image : asset('storage/' . $this->image)) : null,
+            'collection' => $this->collection,
+            'badge' => $this->badge,
             'category' => new CategoryResource($this->whenLoaded('category')),
             'created_at' => $this->created_at,
         ];

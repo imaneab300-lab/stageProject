@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, ArrowRight, Star, ShieldCheck, Globe } from 'lucide-react';
+import { ArrowRight, Star, ShieldCheck, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import ProductCard from '../components/ui/ProductCard';
 import DomainCard from '../components/ui/DomainCard';
-import products from '../data/products';
 import domains from '../data/domains';
 import FeedbackModal from '../components/feedback/FeedbackModal';
 
@@ -24,9 +23,24 @@ const FadeIn = ({ children, delay = 0, className = '' }) => (
 );
 
 const Home = () => {
-  const [isFeedbackOpen, setIsFeedbackOpen] = React.useState(false);
-  // Get 4 featured products from the updated dataset
-  const featuredProducts = products.filter(p => p.featured).slice(0, 4);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/products`);
+        if (res.ok) {
+          const data = await res.json();
+          const all = data.data || [];
+          setFeaturedProducts(all.slice(0, 4));
+        }
+      } catch (err) {
+        console.error('Failed to load featured products:', err);
+      }
+    };
+    fetchFeatured();
+  }, []);
 
   return (
     <div className="overflow-hidden bg-aether-800 transition-colors duration-500">

@@ -29,26 +29,68 @@ const emptyForm = {
 
 const Inventory = () => {
   const { theme } = useTheme();
-  const [products, setProducts] = useState(allProducts);
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [modal, setModal] = useState(null); // null | 'add' | 'edit'
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
   const fileInputRef = useRef(null);
+
+  const token = localStorage.getItem('token');
+
+  // Fetch data
+  const fetchData = async () => {
+    try {
+      const [prodRes, catRes] = await Promise.all([
+        fetch(`${import.meta.env.VITE_API_URL}/products`, {
+          headers: { 'Accept': 'application/json' }
+        }),
+        fetch(`${import.meta.env.VITE_API_URL}/categories`, {
+          headers: { 'Accept': 'application/json' }
+        })
+      ]);
+
+      if (prodRes.ok) {
+        const data = await prodRes.json();
+        setProducts(data.data || []);
+      }
+      if (catRes.ok) {
+        const data = await catRes.json();
+        setCategories(data.data || data);
+      }
+    } catch (err) {
+      console.error('Failed to sync with vault:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchData();
+  }, []);
 
   const filtered = products.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.category.toLowerCase().includes(search.toLowerCase())
+    (typeof p.category === 'object' ? p.category?.name : p.category)?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const openAdd = () => { setForm(emptyForm); setPreviewUrl(null); setModal('add'); };
+  const openAdd = () => { 
+    setForm(emptyForm); 
+    setPreviewUrl(null); 
+    setImageFile(null);
+    setModal('add'); 
+  };
+
   const openEdit = (p) => {
     setForm({ 
       name: p.name, 
       collection: p.collection || '', 
-      category: p.category, 
+      category: typeof p.category === 'object' ? p.category.slug : p.category, 
       price: p.price, 
       stock: p.stock, 
       badge: p.badge || '', 
@@ -56,43 +98,96 @@ const Inventory = () => {
       availability: p.availability || 'In Stock',
       materials: Array.isArray(p.materials) ? p.materials.join(', ') : (p.materials || ''),
       season: p.season || 'All Season',
-      image: p.images?.[0] || null
+      image: p.image_url || p.image || null
     });
-    setPreviewUrl(p.images?.[0] || null);
+    setPreviewUrl(p.image_url || p.image || null);
+    setImageFile(null);
     setEditId(p.id);
     setModal('edit');
   };
 
-  const closeModal = () => { setModal(null); setEditId(null); setPreviewUrl(null); };
+  const closeModal = () => { setModal(null); setEditId(null); setPreviewUrl(null); setImageFile(null); };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setImageFile(file);
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
-      setForm(f => ({ ...f, image: url }));
     }
   };
 
-  const handleSave = () => {
-    const formattedProduct = {
-      ...form,
-      price: +form.price,
-      stock: +form.stock,
-      materials: form.materials.split(',').map(m => m.trim()).filter(Boolean),
-      images: [form.image || 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&h=400&fit=crop'],
-      featured: false
-    };
+  const handleSave = async () => {
+    try {
+      // Find category ID
+      const categoryObj = categories.find(c => c.slug === form.category || c.name.toLowerCase() === form.category.toLowerCase());
+      if (!categoryObj) {
+        alert('Please select a valid category from the vault records.');
+        return;
+      }
 
-    if (modal === 'add') {
-      setProducts(prev => [{ ...formattedProduct, id: Date.now() }, ...prev]);
-    } else {
-      setProducts(prev => prev.map(p => p.id === editId ? { ...p, ...formattedProduct } : p));
+      const formData = new FormData();
+      formData.append('name', form.name);
+      formData.append('category_id', categoryObj.id);
+      formData.append('price', form.price);
+      formData.append('stock', form.stock);
+      formData.append('description', form.description);
+      
+      // Optional fields if your backend supports them
+      formData.append('collection', form.collection);
+      formData.append('badge', form.badge);
+      formData.append('availability', form.availability);
+      formData.append('season', form.season);
+      
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
+      const url = modal === 'add' 
+        ? `${import.meta.env.VITE_API_URL}/products` 
+        : `${import.meta.env.VITE_API_URL}/products/${editId}`;
+      
+      const method = modal === 'add' ? 'POST' : 'POST'; // Laravel often prefers POST with _method=PUT for multipart
+      if (modal === 'edit') formData.append('_method', 'PUT');
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        },
+        body: formData
+      });
+
+      if (response.ok) {
+        fetchData(); // Refresh list
+        closeModal();
+      } else {
+        const err = await response.json();
+        alert(err.message || 'Transmission failed');
+      }
+    } catch (err) {
+      console.error('Vault synchronization error:', err);
     }
-    closeModal();
   };
 
-  const handleDelete = (id) => { setProducts(prev => prev.filter(p => p.id !== id)); setDeleteConfirm(null); };
+  const handleDelete = async (id) => { 
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/products/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+      if (response.ok) {
+        setProducts(prev => prev.filter(p => p.id !== id));
+      }
+    } catch (err) {
+      console.error('Failed to eliminate artifact:', err);
+    }
+    setDeleteConfirm(null); 
+  };
 
   return (
     <div className="space-y-5">
@@ -114,7 +209,12 @@ const Inventory = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-aether-700 border border-glass-border rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-aether-700 border border-glass-border rounded-2xl overflow-hidden shadow-sm min-h-[400px] relative">
+        {loading && (
+          <div className="absolute inset-0 bg-aether-900/40 backdrop-blur-sm z-10 flex items-center justify-center">
+            <div className="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -125,47 +225,51 @@ const Inventory = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-glass-border">
-              {filtered.map(p => (
-                <motion.tr key={p.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hover:bg-aether-800/30 transition-colors group">
-                  <td className="px-6 py-4">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-aether-800 border border-glass-border p-1">
-                      <img src={p.images?.[0] || p.image} alt={p.name} className="w-full h-full object-cover rounded-lg grayscale group-hover:grayscale-0 transition-all duration-500" />
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="text-[14px] text-text-primary font-semibold tracking-tight uppercase">{p.name}</p>
-                    <p className="text-[12px] text-text-muted mt-1 uppercase tracking-widest font-medium opacity-60">{p.collection}</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex px-3 py-1 rounded-full border text-[9px] font-bold uppercase tracking-widest ${categoryColors[p.category] || 'bg-slate-500/15 text-slate-400 border-slate-500/20'}`}>
-                      {p.category}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col gap-1.5">
-                      <span className={`text-[12px] font-semibold uppercase tracking-wider ${p.stock <= 5 ? 'text-amber-500' : 'text-text-secondary'}`}>
-                        {p.stock} units
-                      </span>
-                      <div className="w-20 h-1 bg-aether-600 rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full ${p.stock <= 5 ? 'bg-amber-500' : 'bg-cyan-500'}`} style={{ width: `${Math.min(p.stock * 5, 100)}%` }} />
+              {filtered.map(p => {
+                const catName = typeof p.category === 'object' ? p.category?.name : p.category;
+                const catSlug = typeof p.category === 'object' ? p.category?.slug : p.category;
+                return (
+                  <motion.tr key={p.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hover:bg-aether-800/30 transition-colors group">
+                    <td className="px-6 py-4">
+                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-aether-800 border border-glass-border p-1">
+                        <img src={p.image_url || p.image || 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=100&h=100&fit=crop'} alt={p.name} className="w-full h-full object-cover rounded-lg grayscale group-hover:grayscale-0 transition-all duration-500" />
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm text-cyan-500 font-bold font-serif">${p.price.toLocaleString()}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <button onClick={() => openEdit(p)} className="p-2 rounded-lg text-text-muted hover:text-cyan-500 hover:bg-cyan-500/10 transition-all border border-transparent hover:border-cyan-500/20">
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => setDeleteConfirm(p.id)} className="p-2 rounded-lg text-text-muted hover:text-red-500 hover:bg-red-500/10 transition-all border border-transparent hover:border-red-500/20">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </motion.tr>
-              ))}
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-[14px] text-text-primary font-semibold tracking-tight uppercase">{p.name}</p>
+                      <p className="text-[12px] text-text-muted mt-1 uppercase tracking-widest font-medium opacity-60">{p.collection || 'General Archive'}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex px-3 py-1 rounded-full border text-[9px] font-bold uppercase tracking-widest ${categoryColors[catSlug] || 'bg-slate-500/15 text-slate-400 border-slate-500/20'}`}>
+                        {catName}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1.5">
+                        <span className={`text-[12px] font-semibold uppercase tracking-wider ${p.stock <= 5 ? 'text-amber-500' : 'text-text-secondary'}`}>
+                          {p.stock} units
+                        </span>
+                        <div className="w-20 h-1 bg-aether-600 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full ${p.stock <= 5 ? 'bg-amber-500' : 'bg-cyan-500'}`} style={{ width: `${Math.min(p.stock * 5, 100)}%` }} />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-cyan-500 font-bold font-serif">${Number(p.price).toLocaleString()}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <button onClick={() => openEdit(p)} className="p-2 rounded-lg text-text-muted hover:text-cyan-500 hover:bg-cyan-500/10 transition-all border border-transparent hover:border-cyan-500/20">
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setDeleteConfirm(p.id)} className="p-2 rounded-lg text-text-muted hover:text-red-500 hover:bg-red-500/10 transition-all border border-transparent hover:border-red-500/20">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </motion.tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -226,7 +330,8 @@ const Inventory = () => {
                     <label className="text-[10px] tracking-[0.2em] uppercase text-text-muted mb-2 block font-bold">Category</label>
                     <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
                       className="glass-input appearance-none">
-                      {['jewelry', 'accessories', 'watches', 'perfume', 'beauty', 'fashion'].map(c => <option key={c} value={c} className="bg-aether-700 capitalize">{c}</option>)}
+                      <option value="" disabled className="bg-aether-700">Select Domain</option>
+                      {categories.map(c => <option key={c.id} value={c.slug} className="bg-aether-700 uppercase tracking-tighter">{c.name}</option>)}
                     </select>
                   </div>
                   

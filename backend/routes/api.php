@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\NotificationController;
@@ -13,9 +14,10 @@ use App\Http\Controllers\Api\ReportController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Public Product Routes
+// Public Product/Category Routes
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
+Route::get('/categories', [CategoryController::class, 'index']);
 
 // Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
